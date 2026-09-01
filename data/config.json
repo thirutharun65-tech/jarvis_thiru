@@ -1,0 +1,18 @@
+{
+    "app_name": "JARVIS THIRU",
+    "version": "1.0.0",
+    "ollama_host": "http://localhost:11434",
+    "default_model": "gemma4:26b",
+    "fallback_model": "llama3",
+    "language": "TA",
+    "user_name": "Thiru",
+    "voice_enabled": true,
+    "speech_rate": 175,
+    "speech_volume": 1.0,
+    "voice_gender": "female",
+    "hotkey_listen": "ctrl+shift+j",
+    "theme": "jarvis_neon",
+    "auto_speak_responses": true,
+    "sound_effects": true,
+    "security_safe_mode": true
+}
