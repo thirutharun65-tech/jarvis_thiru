@@ -87,6 +87,17 @@ class StatsWorker(QThread):
         self.stats_ready.emit(stats)
 
 
+class OllamaHealthWorker(QThread):
+    status_ready = Signal(object)
+
+    def __init__(self, client: OllamaClient):
+        super().__init__()
+        self.client = client
+
+    def run(self):
+        self.status_ready.emit(self.client.status())
+
+
 # =============================================================================
 # Main Window
 # =============================================================================
@@ -99,6 +110,7 @@ class MainWindow(QMainWindow):
         self.history    = []          # conversation messages
         self.mode       = "assistant" # assistant / coding / security
         self._streaming = False
+        self._chat_ready = False
         self._tts       = None
         self._stt       = None
         self._voice_active = False
@@ -429,6 +441,9 @@ class MainWindow(QMainWindow):
     def _on_send(self):
         text = self.input_field.text().strip()
         if not text or self._streaming:
+            return
+        if not self._chat_ready:
+            self._append_system("Chat unavailable: Ollama is not ready. Use the status indicator for setup details.")
             return
         self.input_field.clear()
         self._append_user(text)
@@ -959,7 +974,7 @@ class MainWindow(QMainWindow):
         form = QFormLayout(dlg)
 
         name_field = QLineEdit(self.cfg.get("user_name", "Thiru"))
-        model_field = QLineEdit(self.cfg.get("default_model", "phi3"))
+        model_field = QLineEdit(self.cfg.get("default_model", ""))
         lang_combo  = QComboBox()
         lang_combo.addItems(["AUTO", "EN", "TA", "TANGLISH"])
         lang_combo.setCurrentText(self.cfg.get("language", "AUTO"))
@@ -975,7 +990,7 @@ class MainWindow(QMainWindow):
 
         if dlg.exec():
             self.cfg["user_name"]     = name_field.text().strip() or "Thiru"
-            self.cfg["default_model"] = model_field.text().strip() or "phi3"
+            self.cfg["default_model"] = model_field.text().strip()
             self.cfg["language"]      = lang_combo.currentText()
             save_config(self.cfg)
             self.client.default_model = self.cfg["default_model"]
@@ -986,28 +1001,27 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def _check_ollama_status(self):
-        def _check():
-            online = self.client.is_online()
-            from PySide6.QtCore import QMetaObject, Q_ARG
-            QMetaObject.invokeMethod(
-                self, "_set_ollama_indicator",
-                Qt.QueuedConnection,
-                Q_ARG(bool, online)
-            )
-        threading.Thread(target=_check, daemon=True).start()
-        # Recheck every 30s
+        self._health_worker = OllamaHealthWorker(self.client)
+        self._health_worker.status_ready.connect(self._set_ollama_status)
+        self._health_worker.start()
         QTimer.singleShot(30000, self._check_ollama_status)
 
-    @Slot(bool)
-    def _set_ollama_indicator(self, online: bool):
-        if online:
-            self.ollama_indicator.setText("● Ollama: ONLINE")
+    @Slot(object)
+    def _set_ollama_status(self, status):
+        self._chat_ready = status.chat_ready
+        self.send_btn.setEnabled(status.chat_ready and not self._streaming)
+        if status.chat_ready:
+            self.ollama_indicator.setText(f"● Ollama: READY · {status.selected_model}")
             self.ollama_indicator.setStyleSheet("color:#00AA44; font-size:10px; padding:8px 16px;")
             self._show_status(STATUS_ONLINE)
+        elif status.server_online:
+            self.ollama_indicator.setText("● Ollama: RUNNING · NO MODEL")
+            self.ollama_indicator.setStyleSheet("color:#AA7700; font-size:10px; padding:8px 16px;")
+            self._show_status(status.message)
         else:
             self.ollama_indicator.setText("● Ollama: OFFLINE")
             self.ollama_indicator.setStyleSheet("color:#AA4400; font-size:10px; padding:8px 16px;")
-            self._show_status(STATUS_OFFLINE)
+            self._show_status(status.message)
 
     def _update_clock(self):
         self.clock_label.setText(datetime.now().strftime("%d %b %Y  %H:%M:%S"))

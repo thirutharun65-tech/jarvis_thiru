@@ -22,9 +22,15 @@ That's it. The launcher will:
 
 ```bash
 pip install -r requirements.txt
-ollama pull phi3       # download default model (~2GB)
+ollama serve           # keep Ollama running
+ollama list            # inspect installed models
+ollama pull <model>    # install a model, for example: ollama pull llama3.2
 python main.py
 ```
+
+JARVIS uses Ollama's native API at `http://localhost:11434`. The app reports three separate states: server reachable, models installed, and chat-ready after selecting an installed model. It never fabricates an AI response when Ollama is unavailable.
+
+If you want to control this Windows desktop from a deployed Vercel UI, you must run a separately authenticated local bridge on the same machine. This repository currently contains the PySide6 desktop client only; a Vercel deployment cannot reach `localhost` on your PC directly.
 
 ---
 

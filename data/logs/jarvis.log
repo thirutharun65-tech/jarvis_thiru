@@ -200,3 +200,9 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=11434
 ⚠️ Unexpected error: HTTPConnectionPool(host='localhost', p…
 2026-09-01 12:23:14,364 [DEBUG] [Orchestrator] Route → category=ai, intent=chat, extra=None
 2026-09-01 12:24:04,783 [INFO] [STT] STT: listening stopped.
+2026-09-01 07:26:12,914 [ERROR] [SystemMonitor] get_system_stats error: No module named 'psutil'
+2026-09-01 07:26:12,986 [INFO] [TestRunner] Test log entry
+2026-09-01 07:26:46,599 [ERROR] [SystemMonitor] get_system_stats error: No module named 'psutil'
+2026-09-01 07:26:46,602 [INFO] [TestRunner] Test log entry
+2026-09-01 07:27:09,698 [ERROR] [SystemMonitor] get_system_stats error: No module named 'psutil'
+2026-09-01 07:27:09,702 [INFO] [TestRunner] Test log entry

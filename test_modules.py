@@ -35,8 +35,7 @@ try:
     online = client.is_online()
     ok(f"OllamaClient - online={online}")
     if not online:
-        reply = client._fallback_reply("hello")
-        ok(f"Fallback reply: {reply[:50]}")
+        ok("Offline state reported honestly; no fallback reply generated")
 except Exception as e:
     fail("OllamaClient", e)
 
