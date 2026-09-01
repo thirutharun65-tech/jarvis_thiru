@@ -96,13 +96,20 @@ class OllamaClient:
             return OllamaStatus(True, models, None, False, "Ollama is running, but no models are installed. Run `ollama pull <model>`." )
         return OllamaStatus(True, models, selected, True, f"Ollama ready with {selected}")
 
-    def test_connection(self, model: Optional[str] = None) -> str:
-        selected = model or self.default_model
+    def _select_model(self, model: Optional[str] = None) -> str:
+        installed = self.get_installed_models()
+        selected = model or self.default_model or (installed[0] if installed else None)
         if not selected:
-            raise OllamaError("No Ollama model is selected. Install a model with `ollama pull <model>`." )
-        if selected not in self.get_installed_models():
-            raise OllamaError(f"Model '{selected}' is not installed. Run `ollama pull {selected}` or choose an installed model.")
-        return self._chat_request([{ "role": "user", "content": "Hello" }], selected, stream=False).get("message", {}).get("content", "").strip()
+            raise OllamaError("No Ollama model is installed. Run `ollama pull <model>` first.")
+        if selected not in installed:
+            raise OllamaError(f"Model '{selected}' is not installed. Choose one of: {', '.join(installed) or 'none'}.")
+        return selected
+
+    def test_connection(self, model: Optional[str] = None) -> str:
+        selected = self._select_model(model)
+        response = self._chat_request([{ "role": "user", "content": "Reply with exactly: Ollama live chat is working." }], selected, stream=False)
+        return response.json().get("message", {}).get("content", "").strip()
+
 
     def _chat_request(self, messages: List[Dict[str, str]], model: str, stream: bool):
         payload = {"model": model, "messages": messages, "stream": stream, "options": {"temperature": 0.72, "top_p": 0.9}}
@@ -115,12 +122,7 @@ class OllamaClient:
         return response
 
     def chat_stream(self, messages: List[Dict[str, str]], model: Optional[str] = None, mode: str = "assistant", lang: str = "AUTO", user_name: str = "Thiru") -> Generator[str, None, None]:
-        selected = model or self.default_model
-        if not selected:
-            raise OllamaError("No Ollama model is selected.")
-        installed = self.get_installed_models()
-        if selected not in installed:
-            raise OllamaError(f"Model '{selected}' is not installed. Choose one of: {', '.join(installed) or 'none'}.")
+        selected = self._select_model(model)
         full_messages = [{"role": "system", "content": get_system_prompt(mode=mode, lang=lang, user_name=user_name)}] + messages
         with self._chat_request(full_messages, selected, stream=True) as response:
             for raw_line in response.iter_lines():
