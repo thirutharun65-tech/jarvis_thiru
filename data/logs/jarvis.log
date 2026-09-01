@@ -206,3 +206,7 @@ requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=11434
 2026-09-01 07:26:46,602 [INFO] [TestRunner] Test log entry
 2026-09-01 07:27:09,698 [ERROR] [SystemMonitor] get_system_stats error: No module named 'psutil'
 2026-09-01 07:27:09,702 [INFO] [TestRunner] Test log entry
+2026-09-01 07:31:11,016 [ERROR] [SystemMonitor] get_system_stats error: No module named 'psutil'
+2026-09-01 07:31:11,018 [INFO] [TestRunner] Test log entry
+2026-09-01 07:31:11,242 [ERROR] [SystemMonitor] get_system_stats error: No module named 'psutil'
+2026-09-01 07:31:11,245 [INFO] [TestRunner] Test log entry
