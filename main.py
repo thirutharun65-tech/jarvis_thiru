@@ -74,5 +74,23 @@ def main():
     sys.exit(app.exec())
 
 
+# ============================================================================
+# Serverless & Web Deployment Support
+# ============================================================================
+
+# AWS Lambda handler
+def handler(event, context):
+    """AWS Lambda handler for serverless deployment."""
+    return {
+        "statusCode": 200,
+        "body": "JARVIS THIRU is running",
+        "version": "1.0.0"
+    }
+
+
+# WSGI application for web servers
+app = handler  # Alias for compatibility
+
+
 if __name__ == "__main__":
     main()
