@@ -1,0 +1,10 @@
+{
+  "name": "JARVIS THIRU — AI Assistant & Windows Control",
+  "description": "Iron Man-inspired personal desktop assistant with real-time Windows control, fast intent routing, voice engine, multi-step coding agent, system monitor, and security lab.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
