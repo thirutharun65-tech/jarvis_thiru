@@ -13,6 +13,25 @@ from app.config import load_config
 logger = get_logger("Main")
 
 
+def handler(request):
+    """Vercel-compatible health endpoint for the desktop application package.
+
+    The PySide6 desktop UI must be started locally with ``python main.py``.
+    Vercel cannot launch a desktop window or reach Ollama on a user's machine,
+    but exposing this handler lets deployment health checks complete honestly.
+    """
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": {
+            "service": "JARVIS THIRU",
+            "status": "desktop-client",
+            "message": "Run python main.py locally to launch the PySide6 UI.",
+            "ollama": "Connect Ollama through a separately hosted bridge.",
+        },
+    }
+
+
 def _check_dependencies() -> bool:
     missing = []
     for pkg, mod in [
